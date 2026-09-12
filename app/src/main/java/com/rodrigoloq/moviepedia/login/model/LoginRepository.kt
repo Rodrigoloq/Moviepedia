@@ -5,10 +5,11 @@ import com.rodrigoloq.moviepedia.room.UserDAO
 import com.rodrigoloq.moviepedia.room.entities.UserAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class LoginRepository {
-    private val userDAO: UserDAO by lazy { MoviepediaApp.ldb.userDAO() }
-
+class LoginRepository @Inject constructor(
+    private val userDAO: UserDAO
+) {
     suspend fun loginUser(email: String,
                           password: String,
                           onResult: suspend (UserAuth?) -> Unit) =

@@ -1,6 +1,7 @@
 package com.rodrigoloq.moviepedia.account
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,9 +16,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +35,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -39,46 +43,71 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.rodrigoloq.moviepedia.R
+import com.rodrigoloq.moviepedia.account.viewmodel.AccountUIState
 import com.rodrigoloq.moviepedia.account.viewmodel.AccountViewModel
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
+import com.rodrigoloq.moviepedia.room.entities.User
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 import com.rodrigoloq.moviepedia.utils.Utils
+import kotlin.math.log
 
-@Preview(showSystemUi = true,
+@Preview(
+    showSystemUi = true,
     uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true,)
+    showBackground = true,
+)
 @Composable
-fun AccountViewPreview(){
+fun AccountViewPreview() {
     MoviepediaTheme() {
-        Scaffold() {
-            AccountView(rememberNavController(),
-                Modifier.padding(it))
+        Surface() {
+            AccountViewContent(
+                state = AccountUIState(user = User(username = "-", email = "-", password = "-")),
+                navController = rememberNavController(),
+                modifier = Modifier,
+                logout = {}
+            ) { }
         }
     }
 }
 
 @Composable
-fun AccountView(navController: NavController,
-                modifier: Modifier = Modifier,
-                viewModel: AccountViewModel = viewModel()){
+fun AccountViewContent(
+    state: AccountUIState,
+    navController: NavController,
+    modifier: Modifier,
+    logout: () -> Unit,
+    getUserInfo: () -> Unit
+) {
+    val context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        viewModel.getUserInfo(MoviepediaApp.auth.id)
+    LaunchedEffect(state.errorLoadingUser) {
+        if (state.errorLoadingUser) {
+            Toast.makeText(
+                context,
+                "Error al cargar los datos",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
-    val isLoading = viewModel.isLoading
-    val user = viewModel.userData
+    LaunchedEffect(Unit) {
+        getUserInfo()
+    }
 
     var formatedDate by remember { mutableStateOf("") }
-    formatedDate = Utils().dateFormater(user?.createdAt ?: 0, false)
+    formatedDate = Utils().dateFormater(state.user.createdAt, false)
 
-    Column(modifier.fillMaxSize().padding(16.dp),
+    Column(
+        modifier
+            .fillMaxSize()
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center) {
-        Box(modifier = Modifier.padding(top = 20.dp)){
+        verticalArrangement = Arrangement.Center
+    ) {
+        Box(modifier = Modifier.padding(top = 20.dp)) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(user?.imgLocation ?: "")
+                    .data(state.user.imgLocation)
                     .crossfade(true)
                     .build(),
                 contentDescription = null,
@@ -91,56 +120,99 @@ fun AccountView(navController: NavController,
                     .size(120.dp)
             )
         }
-        Row(modifier = Modifier
-            .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(modifier = Modifier.padding(top = 20.dp),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                modifier = Modifier.padding(top = 20.dp),
                 text = "Nombres:",
-                fontSize = 15.sp)
-            Text(modifier = Modifier.padding(top = 20.dp),
-                text = if (isLoading) "Cargando datos" else user?.username ?: "--",
-                fontSize = 15.sp)
+                fontSize = 15.sp
+            )
+            Text(
+                modifier = Modifier.padding(top = 20.dp),
+                text = if (state.inProgress) "Cargando datos" else state.user.username,
+                fontSize = 15.sp
+            )
         }
-        Row(modifier = Modifier
-            .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(modifier = Modifier.padding(top = 20.dp),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                modifier = Modifier.padding(top = 20.dp),
                 text = "Email:",
-                fontSize = 15.sp)
-            Text(modifier = Modifier.padding(top = 20.dp),
-                text = if (isLoading) "Cargando datos" else user?.email ?: "--",
-                fontSize = 15.sp)
+                fontSize = 15.sp
+            )
+            Text(
+                modifier = Modifier.padding(top = 20.dp),
+                text = if (state.inProgress) "Cargando datos" else state.user.email,
+                fontSize = 15.sp
+            )
         }
-        Row(modifier = Modifier
-            .fillMaxWidth().padding(bottom = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(modifier = Modifier.padding(top = 20.dp),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                modifier = Modifier.padding(top = 20.dp),
                 text = "Miembro desde:",
-                fontSize = 15.sp)
-            Text(modifier = Modifier.padding(top = 20.dp),
-                text = if (isLoading) "Cargando datos" else
-                    if(formatedDate == "31/12/1969") "--" else formatedDate ,
-                fontSize = 15.sp)
+                fontSize = 15.sp
+            )
+            Text(
+                modifier = Modifier.padding(top = 20.dp),
+                text = if (state.inProgress) "Cargando datos" else
+                    if (formatedDate == "31/12/1969") "--" else formatedDate,
+                fontSize = 15.sp
+            )
         }
-        Button(modifier = Modifier.width(170.dp),
+        Button(
+            modifier = Modifier.width(170.dp),
             onClick = {
                 navController.navigate("user_reviews")
-        }){
+            }) {
             Text("Mis reseñas")
         }
-        Button(modifier = Modifier.width(170.dp).padding(vertical = 8.dp),
+        Button(
+            modifier = Modifier
+                .width(170.dp)
+                .padding(vertical = 8.dp),
             onClick = {
                 navController.navigate("edit_info")
-        }){
+            }) {
             Text("Editar informacion")
         }
-        Button(modifier = Modifier.width(170.dp),
+        Button(
+            modifier = Modifier.width(170.dp),
             onClick = {
-            viewModel.logout()
-        }){
+                logout()
+            }) {
             Text("Cerrar sesion")
         }
-
     }
+}
 
+@Composable
+fun AccountView(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: AccountViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    AccountViewContent(
+        state = uiState,
+        navController = navController,
+        modifier = modifier,
+        logout = {
+            viewModel.logout()
+        },
+        getUserInfo = {
+            viewModel.getUserInfo()
+        }
+    )
 }

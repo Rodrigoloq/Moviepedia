@@ -7,57 +7,57 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rodrigoloq.moviepedia.di.AppConfig
 import com.rodrigoloq.moviepedia.home.model.HomeRepository
 import com.rodrigoloq.moviepedia.retrofit.entities.MovieResponse
 import com.rodrigoloq.moviepedia.retrofit.entities.Result
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
 import com.rodrigoloq.moviepedia.room.entities.User
 import com.rodrigoloq.moviepedia.session.SessionManager
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeViewModel : ViewModel() {
-    private val repository = HomeRepository()
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val repository: HomeRepository,
+    private val appConfig: AppConfig
+) : ViewModel() {
+    private val _uiState = MutableStateFlow(HomeUIState())
 
-    var isLoading by mutableStateOf(false)
-    var lastMovies by mutableStateOf<List<Result>>(emptyList())
-        private set
-    var popularMovies by mutableStateOf<List<Result>>(emptyList())
-        private set
-    var userData by mutableStateOf<User?>(null)
+    val uiState: StateFlow<HomeUIState> = _uiState.asStateFlow()
 
-    fun getListLastMovies(){
-        isLoading = true
+
+    init {
+        getAllInformation()
+    }
+
+    fun getAllInformation(){
+        _uiState.update { it.copy(inProgress = true) }
         viewModelScope.launch {
             repository.getListLastMovies { response ->
                 if(response != null){
-                    lastMovies = response.results
+                    _uiState.update { it.copy(lastMovies = response.results) }
                 }
-                isLoading = false
             }
-        }
-    }
-
-    fun getListPopularMovies(){
-        isLoading = true
-        viewModelScope.launch {
             repository.getListPopularMovies { response ->
                 if(response != null){
-                    popularMovies = response.results
+                    _uiState.update { it.copy(popularMovies = response.results) }
                 }
-                isLoading = false
             }
-        }
-    }
-
-    fun getUserInfo(){
-        viewModelScope.launch {
-            repository.getUserInfo(MoviepediaApp.auth.id){ user ->
+            repository.getUserInfo(appConfig.auth.id){ user ->
                 if(user != null){
-                    userData = user
+                    _uiState.update { it.copy(userData = user) }
                 }
             }
+            _uiState.update { it.copy(inProgress = false) }
         }
     }
 }

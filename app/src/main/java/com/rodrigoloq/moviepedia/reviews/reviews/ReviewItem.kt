@@ -1,4 +1,4 @@
-package com.rodrigoloq.moviepedia.reviews
+package com.rodrigoloq.moviepedia.reviews.reviews
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -12,7 +12,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,13 +22,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.rodrigoloq.moviepedia.R
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieDetailResponse
-import com.rodrigoloq.moviepedia.reviews.viewmodel.ReviewsViewModel
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
 import com.rodrigoloq.moviepedia.room.entities.Reviews
 import com.rodrigoloq.moviepedia.room.entities.User
@@ -40,22 +36,29 @@ import com.rodrigoloq.moviepedia.utils.Utils
 @Composable
 fun ReviewItemViewPreview(){
     MoviepediaTheme() {
-        ReviewItemView(userReview = mapOf(), review = Reviews(
+        ReviewItemView(user = User(
+            id = 1,
+            username = "TODO()",
+            email = "TODO()",
+            password = "TODO()",
+            imgLocation = "TODO()"
+        ), review = Reviews(
             rating = 1,
             userId = 1,
             movieId = 1,
             review = "TODO()"
-        )){}
+        ), userId = 1){}
     }
 }
 
 @Composable
 fun ReviewItemView(modifier: Modifier = Modifier,
                    review: Reviews,
-                   userReview: Map<Reviews,User>,
+                   user: User,
+                   userId: Long,
                    showBottomSheet:() -> Unit){
 
-    val user = userReview[review]
+//    val user = userReview[review]
 
 
     val date = if(review.editedAt.toInt() != 0){
@@ -92,7 +95,7 @@ fun ReviewItemView(modifier: Modifier = Modifier,
                 Text(date,
                     Modifier.fillMaxWidth(), textAlign = TextAlign.End)
             }
-            if (review.userId == MoviepediaApp.auth.id){
+            if (review.userId == userId){
                 Icon(painter = painterResource(R.drawable.ic_menu),
                     contentDescription = "",
                     tint = Color.Gray,

@@ -13,11 +13,12 @@ import com.rodrigoloq.moviepedia.room.UserDAO
 import com.rodrigoloq.moviepedia.room.entities.Favorites
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class MovieDetailRepository {
-    private val movieService: MovieService by lazy { MoviepediaApp.rdb.create(MovieService::class.java)}
-    private val favoritesDAO: FavoritesDAO by lazy { MoviepediaApp.ldb.FavoritesDAO() }
-
+class MovieDetailRepository @Inject constructor(
+    private val movieService: MovieService,
+    private val favoritesDAO: FavoritesDAO
+){
     suspend fun getMovieDetail(movieId: Int, onResult:(MovieDetailResponse?) -> Unit) =
         withContext(Dispatchers.IO){
             try {
@@ -29,7 +30,8 @@ class MovieDetailRepository {
             }
     }
 
-    suspend fun getMovieAlternativeTitles(movieId: Int, onResult: (AlternativeTitlesResponse?) -> Unit) =
+    suspend fun getMovieAlternativeTitles(movieId: Int,
+                                          onResult: (AlternativeTitlesResponse?) -> Unit) =
         withContext(Dispatchers.IO){
             try {
                 val response = movieService.getMovieAlternativeTitles(movieId)
@@ -68,17 +70,24 @@ class MovieDetailRepository {
                 val isFavorite = favoritesDAO.isMovieFavorite(userId,movieId)
                 onResult(isFavorite)
             } catch (e: Exception) {
+                onResult(false)
                 Log.e("RLTAG", "isFavorite: ${e.message}")
             }
         }
 
-    suspend fun addFavorite(favorites: Favorites, onResult: (Boolean?) -> Unit) =
+    suspend fun addFavorite(userId: Long, movieId: Int, onResult: (Boolean) -> Unit) =
         withContext(Dispatchers.IO){
-            if(favoritesDAO.isMovieFavorite(favorites.userId,favorites.movieId)){
-                onResult(null)
-            } else {
-                val newId = favoritesDAO.addFavorite(favorites)
-                onResult(newId > 0)
+            try {
+                if(favoritesDAO.isMovieFavorite(userId,movieId)){
+                    onResult(false)
+                } else {
+                    val newId = favoritesDAO.addFavorite(Favorites(userId = userId,
+                        movieId = movieId))
+                    onResult(newId > 0)
+                }
+            } catch (e: Exception) {
+                onResult(false)
+                Log.e("RLTAG", "addFavorite: ${e.message}", )
             }
         }
 
@@ -89,6 +98,7 @@ class MovieDetailRepository {
                 onResult(deleteRows > 0)
             } catch (e: Exception) {
                 Log.e("RLTAG", "removeFavorite: ${e.message}")
+                onResult(false)
             }
         }
 }

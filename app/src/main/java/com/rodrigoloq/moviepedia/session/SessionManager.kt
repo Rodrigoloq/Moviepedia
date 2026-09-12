@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -16,12 +17,14 @@ class SessionManager(private val context: Context) {
     companion object {
         val USER_ID = longPreferencesKey("user_id")
         val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
+        val USER_NAME = stringPreferencesKey("user_name")
     }
 
-    suspend fun saveSession(userId: Long) {
+    suspend fun saveSession(userId: Long, userName: String) {
         context.dataStore.edit { prefs ->
             prefs[USER_ID] = userId
             prefs[IS_LOGGED_IN] = true
+            prefs[USER_NAME] = userName
         }
     }
 
@@ -30,6 +33,9 @@ class SessionManager(private val context: Context) {
 
     val isLoggedInFlow: Flow<Boolean> = context.dataStore.data
         .map { prefs -> prefs[IS_LOGGED_IN] ?: false }
+
+    val userNameFlow: Flow<String> = context.dataStore.data
+        .map { prefs -> prefs[USER_NAME] ?: "usuario" }
 
     suspend fun logout() {
         context.dataStore.edit { prefs ->

@@ -23,5 +23,6 @@ interface UserDAO{
     @Query("UPDATE users SET username = :userName, email = :email, imgLocation = :imgLocation WHERE id = :userId")
     suspend fun editUsernameEmailPhoto(userId: Long,
                                        userName: String,
-                                       email: String, imgLocation: String): Int
+                                       email: String,
+                                       imgLocation: String): Int
 }

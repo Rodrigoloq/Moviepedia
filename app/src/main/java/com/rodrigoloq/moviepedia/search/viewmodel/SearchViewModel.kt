@@ -7,38 +7,46 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodrigoloq.moviepedia.retrofit.entities.Result
 import com.rodrigoloq.moviepedia.search.model.SearchRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SearchViewModel : ViewModel() {
+@HiltViewModel
+class SearchViewModel @Inject constructor(
+    private val repository: SearchRepository
+): ViewModel() {
+    private val _uiState = MutableStateFlow(SearchUIState())
+    val uiState: StateFlow<SearchUIState> = _uiState.asStateFlow()
 
-    private val repository = SearchRepository()
-    var searchResults by mutableStateOf<List<Result>>(emptyList())
-        private set
-    var topRatedMovies by mutableStateOf<List<Result>>(emptyList())
-        private set
-    var isLoading by mutableStateOf(false)
+    init {
+        getListTopRatedMovies()
+    }
 
     fun getListSearchResult(movie: String){
-        isLoading = true
+        _uiState.update { it.copy(inProgress = true) }
         viewModelScope.launch {
             repository.getListSearchResult(movie) { response ->
                 if(response != null){
-                    searchResults = response.results
+                    _uiState.update { it.copy(searchResults = response.results) }
                 }
-                isLoading = false
             }
+            _uiState.update { it.copy(inProgress = false) }
         }
     }
 
     fun getListTopRatedMovies(){
-        isLoading = true
+        _uiState.update { it.copy(inProgress = true) }
         viewModelScope.launch {
             repository.getListTopRatedMovies { result ->
                 if(result != null){
-                    topRatedMovies = result
+                    _uiState.update { it.copy(topRatedMovies = result) }
                 }
-                isLoading = false
             }
+            _uiState.update { it.copy(inProgress = false) }
         }
     }
 }

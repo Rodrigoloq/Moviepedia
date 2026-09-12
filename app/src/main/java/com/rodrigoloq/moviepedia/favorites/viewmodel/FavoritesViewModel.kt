@@ -6,54 +6,60 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rodrigoloq.moviepedia.di.AppConfig
 import com.rodrigoloq.moviepedia.favorites.model.FavoritesRepository
 import com.rodrigoloq.moviepedia.retrofit.entities.MovieDetailResponse
 import com.rodrigoloq.moviepedia.retrofit.entities.Result
 import com.rodrigoloq.moviepedia.room.entities.Favorites
 import com.rodrigoloq.moviepedia.room.entities.Reviews
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class FavoritesViewModel : ViewModel(){
-    private val repository = FavoritesRepository()
+@HiltViewModel
+class FavoritesViewModel @Inject constructor(
+    private val repository: FavoritesRepository,
+    private val appConfig: AppConfig
+): ViewModel(){
+    private val _uiState = MutableStateFlow(FavoritesUIState())
 
-    var isLoading by mutableStateOf(false)
+    val uiState: StateFlow<FavoritesUIState> = _uiState.asStateFlow()
 
-    var favoritesData by mutableStateOf<List<MovieDetailResponse>>(emptyList())
-        private set
-
-    var isMovieReviewed by mutableStateOf(false)
-
-    fun getUserFavoritesMovies(userId: Long){
-        isLoading = true
+    fun getUserFavoritesMovies(userId: Long = appConfig.auth.id){
+        _uiState.update { it.copy(inProgress = true) }
         viewModelScope.launch {
             repository.getUserFavoritesMovies(userId) { response ->
                 if(response != null){
-                    favoritesData = response
+                    _uiState.update { it.copy(favorites = response) }
                 }
-                isLoading = false
+                _uiState.update { it.copy(inProgress = false) }
             }
         }
     }
 
-    fun removeFavorite(userId: Long, movieId: Int, onResult:(Boolean) -> Unit){
-        var success = true
+    fun removeFavorite(userId: Long = appConfig.auth.id,
+                       movieId: Int){
         viewModelScope.launch {
             repository.removeFavorite(userId, movieId){ result ->
                 if (result){
-                    success = true
+                    _uiState.update { it.copy(successRemovingFavorite = true) }
                     getUserFavoritesMovies(userId)
                 } else {
-                    success = false
+                    _uiState.update { it.copy(successRemovingFavorite = false) }
                 }
             }
-            onResult(success)
         }
     }
 
-    fun isMovieReviewed(userId: Long, movieId: Int){
+    fun isMovieReviewed(userId: Long = appConfig.auth.id,
+                        movieId: Int){
         viewModelScope.launch {
-            repository.isMovieReviewed(userId, movieId){
-                isMovieReviewed = it
+            repository.isMovieReviewed(userId, movieId){response ->
+                _uiState.update { it.copy(isMovieReviewed = response) }
             }
         }
     }

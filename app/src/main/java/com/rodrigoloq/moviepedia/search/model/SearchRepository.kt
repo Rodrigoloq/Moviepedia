@@ -7,11 +7,11 @@ import com.rodrigoloq.moviepedia.retrofit.entities.Result
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class SearchRepository {
-
-    private val movieService: MovieService by lazy { MoviepediaApp.rdb.create(MovieService::class.java)}
-
+class SearchRepository @Inject constructor(
+    private val movieService: MovieService
+){
     suspend fun getListSearchResult(movie: String, onResult:(MovieResponse?) -> Unit) =
         withContext(Dispatchers.IO){
             try {
@@ -19,6 +19,7 @@ class SearchRepository {
                 onResult(response)
             } catch (e: Exception) {
                 onResult(null)
+                Log.e("RLTAG", "getListSearchResult: ${e.message}", )
             }
         }
 
@@ -32,6 +33,7 @@ class SearchRepository {
                 onResult(result)
             } catch (e: Exception) {
                 onResult(null)
+                Log.e("RLTAG", "getListTopRatedMovies: ${e.message}", )
             }
         }
 }

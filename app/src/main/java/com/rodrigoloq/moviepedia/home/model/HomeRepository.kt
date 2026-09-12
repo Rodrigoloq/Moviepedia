@@ -6,21 +6,23 @@ import com.rodrigoloq.moviepedia.retrofit.entities.MovieResponse
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
 import com.rodrigoloq.moviepedia.room.UserDAO
 import com.rodrigoloq.moviepedia.room.entities.User
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class HomeRepository {
-    private val movieService: MovieService by lazy { MoviepediaApp.rdb.create(MovieService::class.java)}
-    private val userDAO: UserDAO by lazy { MoviepediaApp.ldb.userDAO() }
-
+class HomeRepository @Inject constructor(
+    private val movieService: MovieService,
+    private val userDAO: UserDAO
+) {
     suspend fun getListLastMovies(onResult:(MovieResponse?) -> Unit) =
         withContext(Dispatchers.IO){
         try {
             val response = movieService.getListLastMovies()
             onResult(response)
         } catch (e: Exception) {
-            Log.e("RLTAG", "getListLastMovies: ${e.message}", )
             onResult(null)
+            Log.e("RLTAG", "getListLastMovies: ${e.message}", )
         }
     }
 
@@ -30,8 +32,8 @@ class HomeRepository {
                 val response = movieService.getListPopularMovies()
                 onResult(response)
             } catch (e: Exception) {
-                Log.e("RLTAG", "getListPopularMovies: ${e.message}", )
                 onResult(null)
+                Log.e("RLTAG", "getListPopularMovies: ${e.message}", )
             }
         }
 

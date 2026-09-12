@@ -40,16 +40,24 @@ import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 @Composable
 fun FavoriteMoviesItemViewPreview(){
     MoviepediaTheme() {
-        FavoriteMoviesItemView(movie = null){ boolean, string ->
+        FavoriteMoviesItemView(){ boolean, string ->
 
         }
     }
 }
 
 @Composable
-fun FavoriteMoviesItemView(modifier: Modifier = Modifier, movie: MovieDetailResponse?, showBottomSheet:(Boolean, MovieDetailResponse) -> Unit){
+fun FavoriteMoviesItemView(modifier: Modifier = Modifier,
+                           movie: MovieDetailResponse = MovieDetailResponse(
+                               genres = listOf(),
+                               poster_path = "",
+                               title = "-",
+                               release_date = "-",
+                               vote_average = 0.0f
+                           ),
+                           showBottomSheet:(Boolean, MovieDetailResponse) -> Unit){
 
-    val genresList = movie?.genres ?: listOf()
+    val genresList = movie.genres
     val genresIdList = genresList.map { it.id }
     val genres = GenreMapper.getGenreNames(genresIdList)
 
@@ -57,7 +65,7 @@ fun FavoriteMoviesItemView(modifier: Modifier = Modifier, movie: MovieDetailResp
         Row(Modifier.fillMaxWidth().height(150.dp), verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data("https://image.tmdb.org/t/p/original" + movie?.poster_path)
+                    .data("https://image.tmdb.org/t/p/original" + movie.poster_path)
                     .crossfade(true)
                     .build(),
                 contentDescription = null,
@@ -70,13 +78,13 @@ fun FavoriteMoviesItemView(modifier: Modifier = Modifier, movie: MovieDetailResp
                     .height(150.dp)
             )
             Column(modifier = Modifier.padding(start = 8.dp).weight(1f)) {
-                Text(text = movie?.title ?: "-",
+                Text(text = movie.title,
                     fontWeight = FontWeight.Bold,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis)
-                Text(text = "⭐ ${movie?.vote_average ?: "-"}",
+                Text(text = "⭐ ${movie.vote_average}",
                     fontSize = 10.sp)
-                Text(movie?.release_date?.take(4) ?: "-",
+                Text(movie.release_date.take(4),
                     fontSize = 10.sp)
                 Row(modifier = Modifier.padding(vertical = 4.dp)) {
                     genres.take(3).forEach {genre ->
@@ -94,7 +102,7 @@ fun FavoriteMoviesItemView(modifier: Modifier = Modifier, movie: MovieDetailResp
                     tint = Color.Gray,
                     modifier = Modifier.size(40.dp)
                         .clickable {
-                            showBottomSheet(true, movie!!)
+                            showBottomSheet(true, movie)
                         })
             }
         }

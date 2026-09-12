@@ -35,22 +35,23 @@ import com.rodrigoloq.moviepedia.room.MoviepediaApp
 @Composable
 fun FavoritesOptionViewPreview(){
     FavoritesOptionsView(navController = rememberNavController(),
-        movie = MovieDetailResponse(), onShowReview = {}, onDismiss = {})
+        movie = MovieDetailResponse(), onShowReview = {}, onDismiss = {}, removeFavorite = {})
 }
 
 @Composable
 fun FavoritesOptionsView(modifier: Modifier = Modifier,
                          navController: NavController,
                          movie: MovieDetailResponse,
-                         viewModel: FavoritesViewModel = viewModel(),
+                         isMovieReviewed: Boolean = false,
+                         removeFavorite:() -> Unit,
                          onDismiss:() -> Unit,
                          onShowReview:() -> Unit){
     val context = LocalContext.current
-    val isMovieReviewed = viewModel.isMovieReviewed
-
-    LaunchedEffect(Unit) {
-        viewModel.isMovieReviewed(MoviepediaApp.auth.id, movie.id)
-    }
+//    val isMovieReviewed = viewModel.isMovieReviewed
+//
+//    LaunchedEffect(Unit) {
+//        viewModel.isMovieReviewed(MoviepediaApp.auth.id, movie.id)
+//    }
 
     val shareMovie = {
         val intent = Intent().apply {
@@ -69,13 +70,7 @@ fun FavoritesOptionsView(modifier: Modifier = Modifier,
             fontWeight = FontWeight.Bold)
         HorizontalDivider()
         Row(Modifier.fillMaxWidth().clickable{
-            viewModel.removeFavorite(MoviepediaApp.auth.id,movie.id){result ->
-                if (result){
-                    Toast.makeText(context,"Se elimino la pelicula de sus lista de favoritos",
-                        Toast.LENGTH_SHORT).show()
-                    onDismiss()
-                }
-            }
+            removeFavorite()
         }, verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.padding(start = 8.dp)) {
                 Icon(painter = painterResource(R.drawable.ic_remove_favorite), "")

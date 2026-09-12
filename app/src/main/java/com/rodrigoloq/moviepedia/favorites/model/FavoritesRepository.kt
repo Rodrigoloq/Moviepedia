@@ -10,12 +10,13 @@ import com.rodrigoloq.moviepedia.room.UserDAO
 import com.rodrigoloq.moviepedia.room.entities.Favorites
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class FavoritesRepository {
-    private val favoritesDAO: FavoritesDAO by lazy { MoviepediaApp.ldb.FavoritesDAO() }
-    private val reviewDAO: ReviewDAO by lazy { MoviepediaApp.ldb.ReviewDAO() }
-    private val movieService: MovieService by lazy { MoviepediaApp.rdb.create(MovieService::class.java)}
-
+class FavoritesRepository @Inject constructor(
+    private val favoritesDAO: FavoritesDAO,
+    private val reviewDAO: ReviewDAO,
+    private val movieService: MovieService
+) {
     suspend fun getUserFavoritesMovies(userId: Long, onResult:(List<MovieDetailResponse>?) -> Unit) =
         withContext(Dispatchers.IO){
             try {
@@ -26,8 +27,8 @@ class FavoritesRepository {
                 }
                 onResult(favoriteMovies)
             }catch (e: Exception){
-                Log.e("RLTAG", "getUserFavoritesMovies: ${e.message}")
                 onResult(null)
+                Log.e("RLTAG", "getUserFavoritesMovies: ${e.message}")
             }
     }
 
@@ -37,6 +38,7 @@ class FavoritesRepository {
                 val deleteRows = favoritesDAO.removeFavorite(userId, movieId)
                 onResult(deleteRows > 0)
             } catch (e: Exception) {
+                onResult(false)
                 Log.e("RLTAG", "removeFavorite: ${e.message}")
             }
         }
@@ -47,6 +49,7 @@ class FavoritesRepository {
                 val result = reviewDAO.isMovieReviewed(userId, movieId)
                 onResult(result)
             } catch (e: Exception){
+                onResult(false)
                 Log.e("RLTAG", "isMovieReviewed: ${e.message}")
             }
         }

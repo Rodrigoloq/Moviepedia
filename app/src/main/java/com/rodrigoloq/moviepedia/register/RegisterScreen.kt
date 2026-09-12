@@ -1,5 +1,6 @@
 package com.rodrigoloq.moviepedia.register
 
+import android.content.res.Configuration
 import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,31 +42,57 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.rodrigoloq.moviepedia.register.model.RegisterRepository
+import com.rodrigoloq.moviepedia.register.viewmodel.RegisterUIState
 import com.rodrigoloq.moviepedia.register.viewmodel.RegisterViewModel
 import com.rodrigoloq.moviepedia.room.entities.User
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 import kotlinx.coroutines.launch
 import kotlin.text.trim
 
-@Preview
+@Preview(showBackground = true, showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun RegisterViewPreview(){
     MoviepediaTheme() {
-        RegisterView(navController = rememberNavController())
+        Scaffold() {
+            RegisterViewContent(
+                state = RegisterUIState(),
+                modifier = Modifier.padding(it),
+                navController = rememberNavController(),
+                registerUser = {user -> }
+            )
+        }
+
     }
 }
 
 @Composable
-fun RegisterView(navController: NavController,
-                 modifier: Modifier = Modifier,
-                 viewModel: RegisterViewModel = viewModel()){
+fun RegisterViewContent(state: RegisterUIState,
+                        navController: NavController,
+                        modifier: Modifier,
+                        registerUser: (User) -> Unit){
     val focus = LocalFocusManager.current
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(state.successRegister) {
+        when(state.successRegister){
+            true -> {
+                navController.navigate("login"){
+                    popUpTo("register") { inclusive = true }
+                }
+            }
+            false -> {
+                Toast.makeText(context,
+                    state.errorMessage,
+                    Toast.LENGTH_SHORT).show()
+            }
+            null -> Unit
+        }
+    }
 
     val userNameFocusRequester = remember { FocusRequester() }
     val emailFocusRequester = remember { FocusRequester() }
@@ -101,18 +130,10 @@ fun RegisterView(navController: NavController,
             blankRPasswordError = true
             rPasswordFocusRequester.requestFocus()
         } else {
-            viewModel.registerUser(User(
+            registerUser(User(
                 username = userNameTextValue,
                 email = emailTextValue,
-                password = rPasswordTextValue)){ success, errorMsg ->
-                if (success){
-                    navController.navigate("login"){
-                        popUpTo("register") { inclusive = true }
-                    }
-                }else{
-                    Toast.makeText(context,errorMsg, Toast.LENGTH_SHORT).show()
-                }
-            }
+                password = rPasswordTextValue))
         }
     }
 
@@ -245,4 +266,19 @@ fun RegisterView(navController: NavController,
             }
         }
     }
+}
+
+@Composable
+fun RegisterView(navController: NavController,
+                 modifier: Modifier = Modifier,
+                 viewModel: RegisterViewModel = hiltViewModel()){
+    val uiState by viewModel.uiState.collectAsState()
+    RegisterViewContent(
+        state = uiState,
+        navController = navController,
+        modifier = modifier,
+        registerUser = {user ->
+            viewModel.registerUser(user)
+        }
+    )
 }

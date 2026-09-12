@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.carousel.CarouselState
 import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -42,52 +44,51 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.rodrigoloq.moviepedia.R
+import com.rodrigoloq.moviepedia.home.viewmodel.HomeUIState
 import com.rodrigoloq.moviepedia.home.viewmodel.HomeViewModel
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 
 @Preview(showBackground = true, showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun HomeViewPreview(){
+fun HomeViewPreview() {
     MoviepediaTheme() {
-        Scaffold() {
-            HomeView(rememberNavController(),Modifier.padding(it))
+        Scaffold () {
+            HomeViewContent(
+                HomeUIState(),
+                rememberNavController(),
+                Modifier.padding(it)
+            )
         }
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeView(navController: NavController,
-             modifier: Modifier = Modifier,
-             viewModel: HomeViewModel = viewModel()){
+fun HomeViewContent(
+    state: HomeUIState,
+    navController: NavController,
+    modifier: Modifier
+) {
 
-    val lastMovies = viewModel.lastMovies
-    val popularMovies = viewModel.popularMovies
-    val userData = viewModel.userData
-    val isLoading = viewModel.isLoading
-
-    LaunchedEffect(Unit) {
-        viewModel.getListLastMovies()
-        viewModel.getListPopularMovies()
-        viewModel.getUserInfo()
-    }
-
-    val carouselState = remember(lastMovies) {
-        CarouselState(itemCount = { lastMovies.count() })
+    val carouselState = remember(state.lastMovies) {
+        CarouselState(itemCount = { state.lastMovies.count() })
     }
 
     Column(modifier.fillMaxSize()) {
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp)) {
-            Box(modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .align(Alignment.CenterVertically)){
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .align(Alignment.CenterVertically)
+            ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(userData?.imgLocation ?: "")
+                        .data(state.userData.imgLocation)
                         .crossfade(true)
                         .build(),
                     contentDescription = null,
@@ -101,22 +102,30 @@ fun HomeView(navController: NavController,
                 )
             }
             Column() {
-                Text(text = "Bienvenido a Moviepedia \uD83D\uDC4B",
-                    fontSize = 16.sp)
-                Text(text = userData?.username ?: "-",
+                Text(
+                    text = "Bienvenido a Moviepedia \uD83D\uDC4B",
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = state.userData.username,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp)
+                    fontSize = 14.sp
+                )
             }
         }
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 8.dp, end = 8.dp, top = 20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Ultimos lanzamientos",
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp, end = 8.dp, top = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Ultimos lanzamientos",
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp)
+                fontSize = 16.sp
+            )
         }
-        if (!isLoading){
+        if (!state.inProgress) {
             HorizontalMultiBrowseCarousel(
                 state = carouselState,
                 modifier = Modifier
@@ -125,46 +134,74 @@ fun HomeView(navController: NavController,
                     .padding(vertical = 16.dp, horizontal = 8.dp),
                 itemSpacing = 8.dp,
                 preferredItemWidth = 130.dp
-            ) {i ->
-                val movie = lastMovies[i]
-                LastMoviesItemView(modifier = Modifier.clickable{
+            ) { i ->
+                val movie = state.lastMovies[i]
+                LastMoviesItemView(modifier = Modifier.clickable {
                     navController.navigate("detail" + "/${movie.id}")
-                },movie = movie)
+                }, movie = movie)
             }
         } else {
-            Column(Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center) {
+                verticalArrangement = Arrangement.Center
+            ) {
                 CircularProgressIndicator()
                 Text(text = "Cargando peliculas...")
             }
         }
-        Row(modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 16.dp, horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Popular",
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp)
-        }
-        if(!isLoading){
-            LazyColumn(modifier = Modifier
+        Row(
+            modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp)) {
-                items(popularMovies.size){i ->
-                    val movie = popularMovies[i]
-                    PopularMoviesItemView(modifier = Modifier.clickable{
+                .padding(vertical = 16.dp, horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "Popular",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
+        }
+        if (!state.inProgress) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
+            ) {
+                items(state.popularMovies.size) { i ->
+                    val movie = state.popularMovies[i]
+                    PopularMoviesItemView(modifier = Modifier.clickable {
                         navController.navigate("detail" + "/${movie.id}")
-                    },movie = movie)
+                    }, movie = movie)
                 }
             }
         } else {
-            Column(Modifier.fillMaxWidth().padding(vertical = 8.dp),
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center) {
+                verticalArrangement = Arrangement.Center
+            ) {
                 CircularProgressIndicator()
                 Text(text = "Cargando peliculas...")
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeView(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = hiltViewModel()
+) {
+
+    val uiState by viewModel.uiState.collectAsState()
+
+    HomeViewContent(uiState, navController, modifier)
+
 }

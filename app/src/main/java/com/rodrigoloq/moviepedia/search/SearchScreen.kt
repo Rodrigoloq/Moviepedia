@@ -25,6 +25,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -45,6 +47,7 @@ import com.rodrigoloq.moviepedia.R
 import com.rodrigoloq.moviepedia.home.PopularMoviesItemView
 import com.rodrigoloq.moviepedia.home.viewmodel.HomeViewModel
 import com.rodrigoloq.moviepedia.retrofit.entities.Result
+import com.rodrigoloq.moviepedia.search.viewmodel.SearchUIState
 import com.rodrigoloq.moviepedia.search.viewmodel.SearchViewModel
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 
@@ -53,38 +56,34 @@ import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 fun SearchViewPreview(){
     MoviepediaTheme() {
         Scaffold() {
-            SearchView(rememberNavController(),Modifier.padding(it))
+            SearchViewContent(
+                state = SearchUIState(),
+                navController = rememberNavController(),
+                modifier = Modifier.padding(it)
+            ) { }
         }
     }
 }
 
 @Composable
-fun SearchView(navController: NavController,
-               modifier: Modifier = Modifier,
-               viewModel: SearchViewModel = viewModel()){
-    val context = LocalContext.current
-    val isLoading = viewModel.isLoading
-    val searchResults = viewModel.searchResults
-    val topRatedMovies = viewModel.topRatedMovies
-
+fun SearchViewContent(state: SearchUIState,
+                      navController: NavController,
+                      modifier: Modifier,
+                      getListSearchResult: (String) -> Unit){
     var searchTextValue by remember { mutableStateOf("") }
-
-    LaunchedEffect(Unit) {
-        viewModel.getListTopRatedMovies()
-    }
 
     Column(modifier.fillMaxSize()) {
         TextField(
             value = searchTextValue,
             onValueChange = { searchTextValue = it
-                            viewModel.getListSearchResult(it)},
+                getListSearchResult(it)},
             leadingIcon = {
                 Icon(Icons.Default.Search,"")
             },
             trailingIcon = {
                 IconButton(onClick = {searchTextValue = ""}) {
                     if (!searchTextValue.trim().isEmpty())
-                    Icon(Icons.Default.Close, "")
+                        Icon(Icons.Default.Close, "")
                 }
             },
             modifier = Modifier
@@ -114,15 +113,15 @@ fun SearchView(navController: NavController,
             )
         )
         if(searchTextValue.trim().isEmpty()){
-            if(!isLoading){
+            if(!state.inProgress){
                 LazyVerticalGrid(columns = GridCells.Fixed(3),
                     modifier = Modifier.fillMaxSize()) {
-                    items(topRatedMovies.size){ i ->
-                        val movie = topRatedMovies[i]
+                    items(state.topRatedMovies.size){ i ->
+                        val movie = state.topRatedMovies[i]
                         SearchResultItemView(movie = movie,
                             modifier = Modifier.clickable{
                                 navController.navigate("detail" + "/${movie.id}")
-                        })
+                            })
                     }
                 }
             }else{
@@ -134,7 +133,7 @@ fun SearchView(navController: NavController,
                 }
             }
         } else {
-            if(searchResults.isEmpty() && !isLoading){
+            if(state.searchResults.isEmpty() && !state.inProgress){
                 Column(modifier = Modifier.fillMaxSize().padding(top = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center) {
@@ -146,15 +145,33 @@ fun SearchView(navController: NavController,
             }else{
                 LazyVerticalGrid(columns = GridCells.Fixed(3),
                     modifier = Modifier.fillMaxSize()) {
-                    items(searchResults.size){ i ->
-                        val movie = searchResults[i]
+                    items(state.searchResults.size){ i ->
+                        val movie = state.searchResults[i]
                         SearchResultItemView(movie = movie,
                             modifier = Modifier.clickable{
                                 navController.navigate("detail" + "/${movie.id}")
-                        })
+                            })
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+fun SearchView(navController: NavController,
+               modifier: Modifier = Modifier,
+               viewModel: SearchViewModel = hiltViewModel()
+){
+    val uiState by viewModel.uiState.collectAsState()
+
+    SearchViewContent(
+        state = uiState,
+        navController = navController,
+        modifier = modifier,
+        getListSearchResult = {searchText ->
+            viewModel.getListSearchResult(searchText)
+        }
+    )
+
 }

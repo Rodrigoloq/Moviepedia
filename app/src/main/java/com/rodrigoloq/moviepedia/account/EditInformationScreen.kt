@@ -29,9 +29,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,6 +54,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -60,38 +63,77 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.rodrigoloq.moviepedia.R
+import com.rodrigoloq.moviepedia.account.viewmodel.AccountUIState
 import com.rodrigoloq.moviepedia.account.viewmodel.EditInformationViewModel
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
 import com.rodrigoloq.moviepedia.room.entities.User
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 import kotlin.text.trim
 
-@Preview(showBackground = true,
+@Preview(
+    showBackground = true,
     showSystemUi = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES)
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
-fun EditInformationViewPreview(){
-    MoviepediaTheme{
-        EditInformationView(navController = rememberNavController())
+fun EditInformationViewPreview() {
+    MoviepediaTheme {
+        Scaffold() {
+            EditInformationViewContent(
+                state = AccountUIState(),
+                navController = rememberNavController(),
+                modifier = Modifier.padding(it)
+            ) { userName, email, imgLocation -> }
+        }
     }
 }
 
 @Composable
-fun EditInformationView(navController: NavController,
-                        modifier: Modifier = Modifier,
-                        viewModel: EditInformationViewModel = viewModel()){
-
+fun EditInformationViewContent(
+    state: AccountUIState,
+    navController: NavController,
+    modifier: Modifier,
+    editUsernameAndEmail: (String, String, String) -> Unit
+) {
     val context = LocalContext.current
     val focus = LocalFocusManager.current
-    val user = viewModel.userData
 
-    LaunchedEffect(Unit) {
-        viewModel.getUserInfo(MoviepediaApp.auth.id)
+    LaunchedEffect(state.errorLoadingUser) {
+        if (state.errorLoadingUser) {
+            Toast.makeText(
+                context,
+                "Error al cargar los datos",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
-    var nameTextValue by remember(user) { mutableStateOf(user?.username ?: "") }
-    var emailTextValue by remember(user) { mutableStateOf(user?.email ?: "") }
-    var imageValue by remember(user) { mutableStateOf(user?.imgLocation ?: "") }
+    LaunchedEffect(state.successUpdatingUser) {
+        when (state.successUpdatingUser) {
+            true -> {
+                Toast.makeText(
+                    context,
+                    "Sus datos se han actualizado correctamente",
+                    Toast.LENGTH_SHORT
+                ).show()
+                navController.popBackStack()
+            }
+
+            false -> {
+                Toast.makeText(
+                    context,
+                    "Error al actualizar sus datos",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            null -> Unit
+        }
+    }
+
+    var nameTextValue by remember(state.user) { mutableStateOf(state.user.username) }
+    var emailTextValue by remember(state.user) { mutableStateOf(state.user.email) }
+    var imageValue by remember(state.user) { mutableStateOf(state.user.imgLocation) }
 
     val nameFocusRequester = remember { FocusRequester() }
     val emailFocusRequester = remember { FocusRequester() }
@@ -101,31 +143,24 @@ fun EditInformationView(navController: NavController,
 
     val editInformation = {
         focus.clearFocus()
-        if (blankEmailError || wrongEmailFormatError){
+        if (blankEmailError || wrongEmailFormatError) {
             emailFocusRequester.requestFocus()
-        } else if(blankNameError){
+        } else if (blankNameError) {
             nameFocusRequester.requestFocus()
-        } else{
-            viewModel.editUsernameAndEmail(MoviepediaApp.auth.id,
-                nameTextValue, emailTextValue, imageValue){ result ->
-                if (result) {
-                    Toast.makeText(context,
-                        "Sus datos se han actualizado correctamente",
-                        Toast.LENGTH_SHORT).show()
-                    navController.popBackStack()
-                } else {
-                    Toast.makeText(context,
-                        "Error al actualizar sus datos",
-                        Toast.LENGTH_SHORT).show()
-                }
-            }
+        } else {
+            editUsernameAndEmail(
+                nameTextValue,
+                emailTextValue,
+                imageValue
+            )
         }
 
     }
 
     val galleryResult = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia()) { uri ->
-        if(uri != null){
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
             val flag = Intent.FLAG_GRANT_READ_URI_PERMISSION
             context.contentResolver.takePersistableUriPermission(uri, flag)
             imageValue = uri.toString()
@@ -133,24 +168,37 @@ fun EditInformationView(navController: NavController,
     }
 
     Scaffold() {
-        Column(modifier.padding(it)
-            .background(Color.Transparent)
-            .fillMaxSize()) {
+        Column(
+            modifier
+                .padding(it)
+                .background(Color.Transparent)
+                .fillMaxSize()
+        ) {
             Box() {
-                Icon(painterResource(R.drawable.ic_back_arrow),
+                Icon(
+                    painterResource(R.drawable.ic_back_arrow),
                     "",
-                    Modifier.padding(start = 4.dp).size(25.dp).clickable{
-                        navController.popBackStack()
-                    })
-                Text("Editar informacion", modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    Modifier
+                        .padding(start = 4.dp)
+                        .size(25.dp)
+                        .clickable {
+                            navController.popBackStack()
+                        })
+                Text(
+                    "Editar informacion",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
                     textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Bold,)
+                    fontWeight = FontWeight.Bold,
+                )
             }
             HorizontalDivider()
-            Box(modifier = Modifier.align(Alignment.CenterHorizontally)
-                .padding(10.dp)){
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(10.dp)
+            ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(imageValue)
@@ -174,47 +222,61 @@ fun EditInformationView(navController: NavController,
                         .clip(CircleShape)
                         .size(50.dp)
                         .align(Alignment.TopEnd)
-                        .clickable{
-                            galleryResult.launch(PickVisualMediaRequest(
-                                ActivityResultContracts.PickVisualMedia.ImageOnly
-                            ))
+                        .clickable {
+                            galleryResult.launch(
+                                PickVisualMediaRequest(
+                                    ActivityResultContracts.PickVisualMedia.ImageOnly
+                                )
+                            )
                         }
                 )
             }
-            OutlinedTextField(modifier = Modifier.fillMaxWidth()
-                .padding(top = 10.dp, start = 10.dp, end = 10.dp)
-                .focusRequester(nameFocusRequester),
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, start = 10.dp, end = 10.dp)
+                    .focusRequester(nameFocusRequester),
                 singleLine = true,
                 value = nameTextValue,
                 onValueChange = {
                     blankNameError = it.trim().isEmpty()
-                    nameTextValue = it },
+                    nameTextValue = it
+                },
                 supportingText = {
-                    if(blankNameError)
-                        Text(text = "Ingrese nombres",
-                            color = MaterialTheme.colorScheme.error)
+                    if (blankNameError)
+                        Text(
+                            text = "Ingrese nombres",
+                            color = MaterialTheme.colorScheme.error
+                        )
                 },
                 isError = blankNameError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 label = {
                     Text("Nombres")
                 })
-            OutlinedTextField(modifier = Modifier.fillMaxWidth()
-                .padding(top = 10.dp, start = 10.dp, end = 10.dp)
-                .focusRequester(emailFocusRequester),
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, start = 10.dp, end = 10.dp)
+                    .focusRequester(emailFocusRequester),
                 singleLine = true,
                 value = emailTextValue,
                 onValueChange = {
                     blankEmailError = it.trim().isEmpty()
                     wrongEmailFormatError = !Patterns.EMAIL_ADDRESS.matcher(it).matches()
-                    emailTextValue = it },
+                    emailTextValue = it
+                },
                 supportingText = {
-                    if(blankEmailError)
-                        Text(text = "Ingrese un correo",
-                            color = MaterialTheme.colorScheme.error)
-                    else if(wrongEmailFormatError)
-                        Text(text = "Formato invalido",
-                            color = MaterialTheme.colorScheme.error)
+                    if (blankEmailError)
+                        Text(
+                            text = "Ingrese un correo",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    else if (wrongEmailFormatError)
+                        Text(
+                            text = "Formato invalido",
+                            color = MaterialTheme.colorScheme.error
+                        )
                 },
                 isError = blankEmailError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
@@ -222,17 +284,43 @@ fun EditInformationView(navController: NavController,
                     Text("Email")
                 })
             Row(Modifier.fillMaxHeight()) {
-                Button(modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.Bottom)
-                    .padding(top = 10.dp, start = 10.dp, end = 10.dp),
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Bottom)
+                        .padding(top = 10.dp, start = 10.dp, end = 10.dp),
                     onClick = {
                         editInformation()
                     },
-                    shape = RoundedCornerShape(8.dp)) {
+                    shape = RoundedCornerShape(8.dp)
+                ) {
                     Text(text = "ACTUALIZAR")
                 }
             }
         }
     }
+}
+
+@Composable
+fun EditInformationView(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: EditInformationViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    EditInformationViewContent(
+        state = uiState,
+        navController = navController,
+        modifier = modifier,
+        editUsernameAndEmail = { userName, email, imgLocation ->
+            viewModel.editUsernameAndEmail(
+                userName = userName,
+                email = email,
+                imgLocation = imgLocation
+            )
+        }
+    )
+
+
 }

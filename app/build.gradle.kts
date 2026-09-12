@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.ksp)
+    alias(libs.plugins.hilt)
 }
 
 val localProperties = Properties()
@@ -81,6 +82,10 @@ dependencies {
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.4.0")
     //datastore
     implementation("androidx.datastore:datastore-preferences:1.2.1")
+    //hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

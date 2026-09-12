@@ -3,6 +3,7 @@ package com.rodrigoloq.moviepedia.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -12,26 +13,26 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.rodrigoloq.moviepedia.account.EditInformationView
 import com.rodrigoloq.moviepedia.login.LoginView
-import com.rodrigoloq.moviepedia.login.viewmodel.LoginViewModel
 import com.rodrigoloq.moviepedia.moviedetail.MovieDetailView
 import com.rodrigoloq.moviepedia.navigation.viewmodel.AppNavigationViewModel
 import com.rodrigoloq.moviepedia.register.RegisterView
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieDetailResponse
-import com.rodrigoloq.moviepedia.reviews.ReviewsView
-import com.rodrigoloq.moviepedia.reviews.UserReviewsView
+import com.rodrigoloq.moviepedia.reviews.reviews.ReviewsView
+import com.rodrigoloq.moviepedia.reviews.userreviews.UserReviewsView
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
 import com.rodrigoloq.moviepedia.room.entities.UserAuth
-import com.rodrigoloq.moviepedia.session.SessionManager
 
 @Composable
-fun AppNavigation(viewModel: AppNavigationViewModel = viewModel()){
+fun AppNavigation(viewModel: AppNavigationViewModel = hiltViewModel()){
 
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
     val userId by viewModel.userId.collectAsState()
+    val userName by viewModel.userName.collectAsState()
 
     val navController = rememberNavController()
 
-    MoviepediaApp.auth = UserAuth(userId ?: 0,"usuario")
+
+//    MoviepediaApp.auth = UserAuth(userId ?: 0, userName)
+    viewModel.addUserAuth(userId ?: 0, userName)
 
     val startDestination = if(isLoggedIn) "main" else "auth"
 

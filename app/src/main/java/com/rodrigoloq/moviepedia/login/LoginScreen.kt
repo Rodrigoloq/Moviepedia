@@ -24,6 +24,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,10 +45,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.UiMode
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.rodrigoloq.moviepedia.R
+import com.rodrigoloq.moviepedia.login.viewmodel.LoginUIState
 import com.rodrigoloq.moviepedia.login.viewmodel.LoginViewModel
 import com.rodrigoloq.moviepedia.session.SessionManager
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
@@ -54,20 +58,48 @@ import kotlin.text.trim
 
 @Preview(showBackground = true, showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun LoginViewPreview(){
+fun LoginViewPreview() {
     MoviepediaTheme() {
-        LoginView(rememberNavController())
+        Scaffold() {
+            LoginViewContent(
+                state = LoginUIState(),
+                navController = rememberNavController(),
+                modifier = Modifier.padding(it)
+            ) { email, password -> }
+        }
+
     }
 }
 
 @Composable
-fun LoginView(navController: NavController,
-              modifier: Modifier = Modifier,
-              viewModel: LoginViewModel = viewModel()){
-
-
+fun LoginViewContent(
+    state: LoginUIState,
+    navController: NavController,
+    modifier: Modifier,
+    loginUser: (String, String) -> Unit
+) {
     val context = LocalContext.current
     val focus = LocalFocusManager.current
+
+    LaunchedEffect(state.loginSuccess) {
+        when (state.loginSuccess) {
+            true -> {
+                navController.navigate("home") {
+                    popUpTo("login") { inclusive = true }
+                }
+            }
+
+            false -> {
+                Toast.makeText(
+                    context,
+                    "Email y/o pin incorrectos",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+            null -> Unit
+        }
+    }
 
     val emailFocusRequester = remember { FocusRequester() }
     val passwordFocusRequester = remember { FocusRequester() }
@@ -82,105 +114,142 @@ fun LoginView(navController: NavController,
 
     val login = {
         focus.clearFocus()
-        if(emailTextValue.trim().isEmpty() || wrongEmailFormatError){
+        if (emailTextValue.trim().isEmpty() || wrongEmailFormatError) {
             blankEmailError = true
             emailFocusRequester.requestFocus()
-        } else if(passwordTextValue.trim().isEmpty()){
+        } else if (passwordTextValue.trim().isEmpty()) {
             blankPasswordError = true
             passwordFocusRequester.requestFocus()
         } else {
-            viewModel.loginUser(emailTextValue,passwordTextValue){success ->
-                if(success){
-                    navController.navigate("home"){
-                        popUpTo("login") { inclusive = true }
-                    }
-                }else{
-                    Toast.makeText(context,
-                        "Email y/o pin incorrectos",
-                        Toast.LENGTH_SHORT).show()
-                }
-            }
+            loginUser(emailTextValue, passwordTextValue)
         }
     }
 
     Scaffold() {
-        Column(modifier.padding(it).fillMaxSize(),
+        Column(
+            modifier
+                .padding(it)
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {
-            Image(painter = painterResource(R.drawable.logo),
-                contentDescription = "")
-            OutlinedTextField(modifier = Modifier.fillMaxWidth()
-                .padding(top = 10.dp, start = 10.dp, end = 10.dp)
-                .focusRequester(emailFocusRequester),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(R.drawable.logo),
+                contentDescription = ""
+            )
+            OutlinedTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp, start = 10.dp, end = 10.dp)
+                    .focusRequester(emailFocusRequester),
                 singleLine = true,
                 value = emailTextValue,
                 onValueChange = {
                     blankEmailError = it.trim().isEmpty()
                     wrongEmailFormatError = !Patterns.EMAIL_ADDRESS.matcher(it).matches()
-                    emailTextValue = it },
+                    emailTextValue = it
+                },
                 supportingText = {
-                    if(blankEmailError)
-                        Text(text = "Ingrese correo electronico",
-                            color = MaterialTheme.colorScheme.error)
-                    else if(wrongEmailFormatError)
-                        Text(text = "Formato invalido",
-                            color = MaterialTheme.colorScheme.error)
+                    if (blankEmailError)
+                        Text(
+                            text = "Ingrese correo electronico",
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    else if (wrongEmailFormatError)
+                        Text(
+                            text = "Formato invalido",
+                            color = MaterialTheme.colorScheme.error
+                        )
                 },
                 isError = blankEmailError || wrongEmailFormatError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 label = {
                     Text("Correo electronico")
                 })
-            OutlinedTextField(value = passwordTextValue,
-                modifier = Modifier.fillMaxWidth()
+            OutlinedTextField(
+                value = passwordTextValue,
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(start = 10.dp, end = 10.dp)
                     .focusRequester(passwordFocusRequester),
                 singleLine = true,
                 onValueChange = {
                     blankPasswordError = it.trim().isEmpty()
-                    passwordTextValue = it },
+                    passwordTextValue = it
+                },
                 supportingText = {
-                    if(blankPasswordError)
-                        Text(text = "Ingrese contraseña",
-                            color = MaterialTheme.colorScheme.error)
+                    if (blankPasswordError)
+                        Text(
+                            text = "Ingrese contraseña",
+                            color = MaterialTheme.colorScheme.error
+                        )
                 },
                 isError = blankPasswordError,
                 label = {
                     Text("Contraseña")
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                visualTransformation = if(passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     IconButton(
-                        onClick = {passwordVisible = !passwordVisible}
-                    ){
-                        if(passwordVisible){
-                            Icon(Icons.Default.VisibilityOff,
-                                contentDescription = null)
-                        } else{
-                            Icon(Icons.Default.Visibility,
-                                contentDescription = null)
+                        onClick = { passwordVisible = !passwordVisible }
+                    ) {
+                        if (passwordVisible) {
+                            Icon(
+                                Icons.Default.VisibilityOff,
+                                contentDescription = null
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.Visibility,
+                                contentDescription = null
+                            )
                         }
                     }
                 })
-                Button(modifier = Modifier.width(250.dp)
+            Button(
+                modifier = Modifier
+                    .width(250.dp)
                     .padding(top = 15.dp),
-                    onClick = {
-                        login()
-                        //navController.navigate("home" + "/1")
-                    },
-                    shape = RoundedCornerShape(8.dp)) {
-                    Text(text = "INGRESAR")
-                }
-                Text(modifier = Modifier.padding(top = 20.dp),
-                    text = "¿No tienes una cuenta?",
-                    fontSize = 15.sp)
-                Text(modifier = Modifier.padding(top = 10.dp)
-                    .clickable{
+                onClick = {
+                    login()
+                },
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text(text = "INGRESAR")
+            }
+            Text(
+                modifier = Modifier.padding(top = 20.dp),
+                text = "¿No tienes una cuenta?",
+                fontSize = 15.sp
+            )
+            Text(
+                modifier = Modifier
+                    .padding(top = 10.dp)
+                    .clickable {
                         navController.navigate("register")
                     },
-                    text = "REGISTRARME", fontWeight = FontWeight.Bold)
+                text = "REGISTRARME", fontWeight = FontWeight.Bold
+            )
         }
     }
+}
+
+@Composable
+fun LoginView(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    viewModel: LoginViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LoginViewContent(
+        state = uiState,
+        navController = navController,
+        modifier = modifier,
+        loginUser = { email, password ->
+            viewModel.loginUser(email, password)
+        }
+    )
 
 }

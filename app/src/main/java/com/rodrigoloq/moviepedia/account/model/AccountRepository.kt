@@ -6,21 +6,27 @@ import com.rodrigoloq.moviepedia.room.UserDAO
 import com.rodrigoloq.moviepedia.room.entities.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class AccountRepository {
-    private val userDAO: UserDAO by lazy { MoviepediaApp.ldb.userDAO() }
-
+class AccountRepository @Inject constructor(
+    private val userDAO: UserDAO
+){
     suspend fun getUserInfo(id: Long, onResult: (User?) -> Unit) =
         withContext(Dispatchers.IO){
-            val user = userDAO.getUserById(id)
-            onResult(user)
+            try {
+                val user = userDAO.getUserById(id)
+                onResult(user)
+            } catch (e: Exception) {
+                onResult(null)
+                Log.e("RLTAG", "getUserInfo: ${e.message}", )
+            }
         }
 
     suspend fun editUsernameEmailPhoto(userId: Long,
-                                     userName: String,
-                                     email: String,
-                                     imgLocation: String,
-                                     onResult: (Boolean) -> Unit) =
+                                       userName: String,
+                                       email: String,
+                                       imgLocation: String,
+                                       onResult: (Boolean) -> Unit) =
         withContext(Dispatchers.IO){
             try {
                 val result = userDAO.editUsernameEmailPhoto(userId,userName,email,imgLocation)

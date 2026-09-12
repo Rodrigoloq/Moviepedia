@@ -1,4 +1,4 @@
-package com.rodrigoloq.moviepedia.reviews
+package com.rodrigoloq.moviepedia.reviews.reviewform
 
 import android.content.res.Configuration
 import android.widget.Toast
@@ -21,8 +21,11 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,10 +39,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.room.util.newStringBuilder
 import com.rodrigoloq.moviepedia.R
 import com.rodrigoloq.moviepedia.retrofit.entities.MovieDetailResponse
-import com.rodrigoloq.moviepedia.reviews.viewmodel.ReviewFormViewModel
+import com.rodrigoloq.moviepedia.reviews.reviewform.viewmodel.ReviewFormUIState
+import com.rodrigoloq.moviepedia.reviews.reviewform.viewmodel.ReviewFormViewModel
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
 import com.rodrigoloq.moviepedia.room.entities.Reviews
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
@@ -47,27 +53,78 @@ import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun ReviewViewPreview() {
-    ReviewView(
-        movie = MovieDetailResponse(
-            title = "El imperio contraataca",
-            release_date = "2020"
-        ), formTitle = "Reseña"
-    ) {}
+    MoviepediaTheme() {
+        Surface() {
+            ReviewViewContent(
+                state = ReviewFormUIState(),
+                modifier = Modifier,
+                movie = MovieDetailResponse(),
+                reviewText = "",
+                reviewRating = "Calificacion",
+                newReview = true,
+                formTitle = "",
+                editReview = {movieId, newReview, newRating ->
+                },
+                addReview = { rating, movieId, review ->
+                }
+            ) { }
+        }
+    }
 }
 
 @Composable
-fun ReviewView(
-    modifier: Modifier = Modifier,
-    movie: MovieDetailResponse,
-    viewModel: ReviewFormViewModel = viewModel(),
-    reviewText: String = "",
-    reviewRating: String = "Calificacion",
-    newReview: Boolean = true,
-    formTitle: String,
-    onShowReview: () -> Unit
-) {
+fun ReviewViewContent(state: ReviewFormUIState,
+                      modifier: Modifier,
+                      movie: MovieDetailResponse,
+                      reviewText: String = "",
+                      reviewRating: String = "Calificacion",
+                      newReview: Boolean = true,
+                      formTitle: String,
+                      editReview: (Int, String, Int) -> Unit,
+                      addReview: (Int, Int, String) -> Unit,
+                      onShowReview: (Boolean?) -> Unit){
+
     val context = LocalContext.current
-    val isLoading = viewModel.isLoading
+
+    LaunchedEffect(state.successEditingReview) {
+        when(state.successEditingReview){
+            true -> {
+                Toast.makeText(
+                    context, "La reseña se ha editado correctamente",
+                    Toast.LENGTH_SHORT
+                ).show()
+                onShowReview(false)
+            }
+            false -> {
+                Toast.makeText(
+                    context, "Error al editar la reseña",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            null -> Unit
+        }
+    }
+
+    LaunchedEffect(state.successAddingReview) {
+        when(state.successAddingReview){
+            true -> {
+                Toast.makeText(
+                    context, "La reseña se ha publicado correctamente",
+                    Toast.LENGTH_SHORT
+                ).show()
+                onShowReview(false)
+            }
+            false -> {
+                Toast.makeText(
+                    context, "Error al publicar la reseña",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            null -> Unit
+        }
+    }
+
+
     var reviewText by remember { mutableStateOf(reviewText) }
     var expanded by remember { mutableStateOf(false) }
     var rating by remember { mutableStateOf(reviewRating) }
@@ -75,23 +132,9 @@ fun ReviewView(
     val editReview = {
         if (!reviewText.trim().isEmpty()) {
             if (!rating.equals("Calificacion")) {
-                viewModel.editReview(MoviepediaApp.auth.id,
-                    movie.id,
+                editReview(movie.id,
                     reviewText,
-                    rating.length) {
-                    if (it) {
-                        Toast.makeText(
-                            context, "La reseña se ha editado correctamente",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        onShowReview()
-                    } else {
-                        Toast.makeText(
-                            context, "Error al editar la reseña",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
+                    rating.length)
             } else {
                 Toast.makeText(
                     context, "Selecciona una calificacion",
@@ -109,26 +152,11 @@ fun ReviewView(
     val postReview = {
         if (!reviewText.trim().isEmpty()) {
             if (!rating.equals("Calificacion")) {
-                viewModel.addReview(
-                    Reviews(
-                        userId = MoviepediaApp.auth.id,
-                        movieId = movie.id, review = reviewText,
-                        rating = rating.length
-                    )
-                ) {
-                    if (it) {
-                        Toast.makeText(
-                            context, "La reseña se ha publicado correctamente",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        onShowReview()
-                    } else {
-                        Toast.makeText(
-                            context, "Error al publicar la reseña",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
+                addReview(
+                    rating.length,
+                    movie.id,
+                    reviewText,
+                )
             } else {
                 Toast.makeText(
                     context, "Selecciona una calificacion",
@@ -151,7 +179,7 @@ fun ReviewView(
                 .clickable(interactionSource = null, indication = null) {},
             contentAlignment = Alignment.Center
         ) {
-            if (!isLoading) {
+            if (!state.inProgress) {
                 Column(
                     Modifier
                         .padding(horizontal = 8.dp)
@@ -246,7 +274,7 @@ fun ReviewView(
                             .padding(horizontal = 8.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.End
                     ) {
-                        Button(onClick = { onShowReview() }) {
+                        Button(onClick = { onShowReview(null) }) {
                             Text("Cancelar")
                         }
                         FilledTonalButton(
@@ -276,4 +304,42 @@ fun ReviewView(
             }
         }
     }
+}
+
+@Composable
+fun ReviewView(
+    modifier: Modifier = Modifier,
+    movie: MovieDetailResponse,
+    reviewText: String = "",
+    reviewRating: String = "Calificacion",
+    newReview: Boolean = true,
+    formTitle: String,
+    viewModel: ReviewFormViewModel = hiltViewModel(),
+    onShowReview: (Boolean?) -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    ReviewViewContent(
+        state = uiState,
+        modifier = modifier,
+        movie = movie,
+        reviewText = reviewText,
+        reviewRating = reviewRating,
+        newReview = newReview,
+        formTitle = formTitle,
+        editReview = { movieId, newReview, newRating ->
+            viewModel.editReview(movieId = movieId,
+                newReview = newReview,
+                newRating = newRating)
+        },
+        addReview = {rating, movieId, review ->
+            viewModel.addReview(rating = rating,
+                movieId = movieId,
+                review = review)
+        },
+        onShowReview = {show ->
+            onShowReview(show)
+        }
+    )
+
 }

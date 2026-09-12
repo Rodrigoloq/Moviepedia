@@ -5,10 +5,11 @@ import com.rodrigoloq.moviepedia.room.UserDAO
 import com.rodrigoloq.moviepedia.room.entities.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class RegisterRepository {
-    private val userDAO: UserDAO by lazy { MoviepediaApp.ldb.userDAO() }
-
+class RegisterRepository @Inject constructor(
+    private val userDAO: UserDAO
+){
     suspend fun registerUser(user: User,
                              onResult: suspend (Boolean, String) -> Unit) =
         withContext(Dispatchers.IO) {
