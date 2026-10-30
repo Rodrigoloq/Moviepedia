@@ -40,7 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.rodrigoloq.moviepedia.R
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieDetailResponse
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieDetailResponse
 import com.rodrigoloq.moviepedia.feature.reviews.reviews.ReviewOptionsView
 import com.rodrigoloq.moviepedia.feature.reviews.reviewform.ReviewView
 import com.rodrigoloq.moviepedia.feature.reviews.userreviews.viewmodel.UserReviewsUIState

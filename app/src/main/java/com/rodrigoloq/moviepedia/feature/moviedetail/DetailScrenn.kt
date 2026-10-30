@@ -29,10 +29,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.rodrigoloq.moviepedia.retrofit.entities.AlternativeTitles
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieDetailResponse
-import com.rodrigoloq.moviepedia.retrofit.entities.ProductionCompanies
-import com.rodrigoloq.moviepedia.retrofit.entities.SpokenLanguages
+import com.rodrigoloq.moviepedia.data.retrofit.entities.AlternativeTitles
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieDetailResponse
+import com.rodrigoloq.moviepedia.data.retrofit.entities.ProductionCompanies
+import com.rodrigoloq.moviepedia.data.retrofit.entities.SpokenLanguages
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)

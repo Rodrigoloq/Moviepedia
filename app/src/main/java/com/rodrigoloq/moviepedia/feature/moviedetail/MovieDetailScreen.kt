@@ -67,9 +67,8 @@ import coil3.request.crossfade
 import com.rodrigoloq.moviepedia.R
 import com.rodrigoloq.moviepedia.feature.moviedetail.viewmodel.MovieDetailUIState
 import com.rodrigoloq.moviepedia.feature.moviedetail.viewmodel.MovieDetailViewModel
-import com.rodrigoloq.moviepedia.retrofit.entities.GenreMapper
-import com.rodrigoloq.moviepedia.room.MoviepediaApp
-import com.rodrigoloq.moviepedia.room.entities.Favorites
+import com.rodrigoloq.moviepedia.data.retrofit.entities.GenreMapper
+import com.rodrigoloq.moviepedia.data.room.entities.Favorites
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 
 @Preview(showBackground = true, showSystemUi = true, uiMode = Configuration.UI_MODE_NIGHT_YES)

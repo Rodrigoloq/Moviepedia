@@ -1,9 +1,9 @@
 package com.rodrigoloq.moviepedia.feature.search.model
 
 import android.util.Log
-import com.rodrigoloq.moviepedia.retrofit.MovieService
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieResponse
-import com.rodrigoloq.moviepedia.retrofit.entities.Result
+import com.rodrigoloq.moviepedia.data.retrofit.MovieService
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieResponse
+import com.rodrigoloq.moviepedia.data.retrofit.entities.Result
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

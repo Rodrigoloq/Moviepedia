@@ -29,8 +29,8 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.rodrigoloq.moviepedia.R
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieDetailResponse
-import com.rodrigoloq.moviepedia.room.entities.Reviews
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieDetailResponse
+import com.rodrigoloq.moviepedia.data.room.entities.Reviews
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 import com.rodrigoloq.moviepedia.utils.Utils
 

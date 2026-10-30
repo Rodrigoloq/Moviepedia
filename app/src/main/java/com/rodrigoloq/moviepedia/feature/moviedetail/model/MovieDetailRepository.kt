@@ -2,15 +2,15 @@ package com.rodrigoloq.moviepedia.feature.moviedetail.model
 
 import android.graphics.Movie
 import android.util.Log
-import com.rodrigoloq.moviepedia.retrofit.MovieService
-import com.rodrigoloq.moviepedia.retrofit.entities.AlternativeTitlesResponse
-import com.rodrigoloq.moviepedia.retrofit.entities.CreditsResponse
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieDetailResponse
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieReleasesResponse
-import com.rodrigoloq.moviepedia.room.FavoritesDAO
+import com.rodrigoloq.moviepedia.data.retrofit.MovieService
+import com.rodrigoloq.moviepedia.data.retrofit.entities.AlternativeTitlesResponse
+import com.rodrigoloq.moviepedia.data.retrofit.entities.CreditsResponse
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieDetailResponse
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieReleasesResponse
+import com.rodrigoloq.moviepedia.data.room.FavoritesDAO
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
-import com.rodrigoloq.moviepedia.room.UserDAO
-import com.rodrigoloq.moviepedia.room.entities.Favorites
+import com.rodrigoloq.moviepedia.data.room.UserDAO
+import com.rodrigoloq.moviepedia.data.room.entities.Favorites
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

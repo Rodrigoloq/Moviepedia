@@ -2,10 +2,10 @@ package com.rodrigoloq.moviepedia.di
 
 import android.content.Context
 import androidx.room.Room
-import com.rodrigoloq.moviepedia.room.AppDatabase
-import com.rodrigoloq.moviepedia.room.FavoritesDAO
-import com.rodrigoloq.moviepedia.room.ReviewDAO
-import com.rodrigoloq.moviepedia.room.UserDAO
+import com.rodrigoloq.moviepedia.data.room.AppDatabase
+import com.rodrigoloq.moviepedia.data.room.FavoritesDAO
+import com.rodrigoloq.moviepedia.data.room.ReviewDAO
+import com.rodrigoloq.moviepedia.data.room.UserDAO
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

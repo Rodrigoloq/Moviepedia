@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodrigoloq.moviepedia.di.AppConfig
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
-import com.rodrigoloq.moviepedia.room.entities.UserAuth
+import com.rodrigoloq.moviepedia.data.room.entities.UserAuth
 import com.rodrigoloq.moviepedia.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted

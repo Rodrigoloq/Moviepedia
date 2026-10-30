@@ -8,11 +8,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodrigoloq.moviepedia.di.AppConfig
 import com.rodrigoloq.moviepedia.feature.moviedetail.model.MovieDetailRepository
-import com.rodrigoloq.moviepedia.retrofit.entities.AlternativeTitles
-import com.rodrigoloq.moviepedia.retrofit.entities.CreditsResponse
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieDetailResponse
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieReleasesResponse
-import com.rodrigoloq.moviepedia.room.entities.Favorites
+import com.rodrigoloq.moviepedia.data.retrofit.entities.AlternativeTitles
+import com.rodrigoloq.moviepedia.data.retrofit.entities.CreditsResponse
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieDetailResponse
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieReleasesResponse
+import com.rodrigoloq.moviepedia.data.room.entities.Favorites
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

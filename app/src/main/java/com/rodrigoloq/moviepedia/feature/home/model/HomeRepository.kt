@@ -1,11 +1,11 @@
 package com.rodrigoloq.moviepedia.feature.home.model
 
 import android.util.Log
-import com.rodrigoloq.moviepedia.retrofit.MovieService
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieResponse
+import com.rodrigoloq.moviepedia.data.retrofit.MovieService
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieResponse
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
-import com.rodrigoloq.moviepedia.room.UserDAO
-import com.rodrigoloq.moviepedia.room.entities.User
+import com.rodrigoloq.moviepedia.data.room.UserDAO
+import com.rodrigoloq.moviepedia.data.room.entities.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

@@ -8,10 +8,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodrigoloq.moviepedia.di.AppConfig
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieDetailResponse
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieDetailResponse
 import com.rodrigoloq.moviepedia.feature.reviews.model.ReviewRepository
-import com.rodrigoloq.moviepedia.room.entities.Reviews
-import com.rodrigoloq.moviepedia.room.entities.User
+import com.rodrigoloq.moviepedia.data.room.entities.Reviews
+import com.rodrigoloq.moviepedia.data.room.entities.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

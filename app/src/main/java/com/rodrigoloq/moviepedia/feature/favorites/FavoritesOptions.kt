@@ -28,7 +28,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.rodrigoloq.moviepedia.R
 import com.rodrigoloq.moviepedia.feature.favorites.viewmodel.FavoritesViewModel
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieDetailResponse
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieDetailResponse
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
 
 @Preview(showBackground = true)

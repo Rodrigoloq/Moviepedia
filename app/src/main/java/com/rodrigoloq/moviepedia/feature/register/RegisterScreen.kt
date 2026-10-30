@@ -49,7 +49,7 @@ import androidx.navigation.compose.rememberNavController
 import com.rodrigoloq.moviepedia.feature.register.model.RegisterRepository
 import com.rodrigoloq.moviepedia.feature.register.viewmodel.RegisterUIState
 import com.rodrigoloq.moviepedia.feature.register.viewmodel.RegisterViewModel
-import com.rodrigoloq.moviepedia.room.entities.User
+import com.rodrigoloq.moviepedia.data.room.entities.User
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 import kotlinx.coroutines.launch
 import kotlin.text.trim

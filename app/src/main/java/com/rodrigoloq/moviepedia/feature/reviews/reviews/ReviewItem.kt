@@ -27,8 +27,8 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.rodrigoloq.moviepedia.R
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
-import com.rodrigoloq.moviepedia.room.entities.Reviews
-import com.rodrigoloq.moviepedia.room.entities.User
+import com.rodrigoloq.moviepedia.data.room.entities.Reviews
+import com.rodrigoloq.moviepedia.data.room.entities.User
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 import com.rodrigoloq.moviepedia.utils.Utils
 

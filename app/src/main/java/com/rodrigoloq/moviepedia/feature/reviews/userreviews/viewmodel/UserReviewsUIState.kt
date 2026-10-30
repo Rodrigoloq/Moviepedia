@@ -1,6 +1,6 @@
 package com.rodrigoloq.moviepedia.feature.reviews.userreviews.viewmodel
 
-import com.rodrigoloq.moviepedia.room.entities.Reviews
+import com.rodrigoloq.moviepedia.data.room.entities.Reviews
 
 data class UserReviewsUIState(
     val reviews: List<Reviews> = listOf(),

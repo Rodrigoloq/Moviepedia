@@ -2,8 +2,8 @@ package com.rodrigoloq.moviepedia.feature.account.model
 
 import android.util.Log
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
-import com.rodrigoloq.moviepedia.room.UserDAO
-import com.rodrigoloq.moviepedia.room.entities.User
+import com.rodrigoloq.moviepedia.data.room.UserDAO
+import com.rodrigoloq.moviepedia.data.room.entities.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

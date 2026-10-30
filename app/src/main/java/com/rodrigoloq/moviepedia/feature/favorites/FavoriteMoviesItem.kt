@@ -32,8 +32,8 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.rodrigoloq.moviepedia.R
-import com.rodrigoloq.moviepedia.retrofit.entities.GenreMapper
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieDetailResponse
+import com.rodrigoloq.moviepedia.data.retrofit.entities.GenreMapper
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieDetailResponse
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 
 @Preview(showBackground = true)

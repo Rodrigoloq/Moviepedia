@@ -9,10 +9,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodrigoloq.moviepedia.di.AppConfig
 import com.rodrigoloq.moviepedia.feature.home.model.HomeRepository
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieResponse
-import com.rodrigoloq.moviepedia.retrofit.entities.Result
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieResponse
+import com.rodrigoloq.moviepedia.data.retrofit.entities.Result
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
-import com.rodrigoloq.moviepedia.room.entities.User
+import com.rodrigoloq.moviepedia.data.room.entities.User
 import com.rodrigoloq.moviepedia.session.SessionManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope

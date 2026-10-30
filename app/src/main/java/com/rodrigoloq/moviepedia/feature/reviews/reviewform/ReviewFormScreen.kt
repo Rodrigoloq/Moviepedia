@@ -43,11 +43,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.room.util.newStringBuilder
 import com.rodrigoloq.moviepedia.R
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieDetailResponse
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieDetailResponse
 import com.rodrigoloq.moviepedia.feature.reviews.reviewform.viewmodel.ReviewFormUIState
 import com.rodrigoloq.moviepedia.feature.reviews.reviewform.viewmodel.ReviewFormViewModel
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
-import com.rodrigoloq.moviepedia.room.entities.Reviews
+import com.rodrigoloq.moviepedia.data.room.entities.Reviews
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)

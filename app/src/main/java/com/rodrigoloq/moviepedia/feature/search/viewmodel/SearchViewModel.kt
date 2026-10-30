@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rodrigoloq.moviepedia.retrofit.entities.Result
+import com.rodrigoloq.moviepedia.data.retrofit.entities.Result
 import com.rodrigoloq.moviepedia.feature.search.model.SearchRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

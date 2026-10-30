@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.rodrigoloq.moviepedia.retrofit.entities.Crew
+import com.rodrigoloq.moviepedia.data.retrofit.entities.Crew
 
 @Composable
 fun CrewView(modifier: Modifier = Modifier, crew: List<Crew>) {

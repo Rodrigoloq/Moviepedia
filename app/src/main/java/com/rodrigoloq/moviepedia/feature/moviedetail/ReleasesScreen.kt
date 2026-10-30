@@ -30,9 +30,9 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.rodrigoloq.moviepedia.R
-import com.rodrigoloq.moviepedia.retrofit.entities.CountryMapper
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieRelease
-import com.rodrigoloq.moviepedia.retrofit.entities.ReleaseDates
+import com.rodrigoloq.moviepedia.data.retrofit.entities.CountryMapper
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieRelease
+import com.rodrigoloq.moviepedia.data.retrofit.entities.ReleaseDates
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 
 @Preview(showBackground = true)

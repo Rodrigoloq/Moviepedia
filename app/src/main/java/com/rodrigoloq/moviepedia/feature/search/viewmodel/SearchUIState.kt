@@ -1,6 +1,6 @@
 package com.rodrigoloq.moviepedia.feature.search.viewmodel
 
-import com.rodrigoloq.moviepedia.retrofit.entities.Result
+import com.rodrigoloq.moviepedia.data.retrofit.entities.Result
 
 data class SearchUIState(
     val searchResults: List<Result> = listOf(),

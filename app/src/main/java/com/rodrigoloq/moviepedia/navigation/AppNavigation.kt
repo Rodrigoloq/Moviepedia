@@ -19,7 +19,7 @@ import com.rodrigoloq.moviepedia.feature.register.RegisterView
 import com.rodrigoloq.moviepedia.feature.reviews.reviews.ReviewsView
 import com.rodrigoloq.moviepedia.feature.reviews.userreviews.UserReviewsView
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
-import com.rodrigoloq.moviepedia.room.entities.UserAuth
+import com.rodrigoloq.moviepedia.data.room.entities.UserAuth
 
 @Composable
 fun AppNavigation(viewModel: AppNavigationViewModel = hiltViewModel()){

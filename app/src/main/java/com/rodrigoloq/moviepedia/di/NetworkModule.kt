@@ -1,6 +1,6 @@
 package com.rodrigoloq.moviepedia.di
 
-import com.rodrigoloq.moviepedia.retrofit.MovieService
+import com.rodrigoloq.moviepedia.data.retrofit.MovieService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

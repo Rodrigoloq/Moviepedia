@@ -1,7 +1,7 @@
 package com.rodrigoloq.moviepedia.feature.account.viewmodel
 
 import androidx.navigation.navDeepLink
-import com.rodrigoloq.moviepedia.room.entities.User
+import com.rodrigoloq.moviepedia.data.room.entities.User
 
 data class AccountUIState(
     val user: User = User(username = "", email = "", password = ""),

@@ -46,7 +46,7 @@ import androidx.navigation.compose.rememberNavController
 import com.rodrigoloq.moviepedia.R
 import com.rodrigoloq.moviepedia.feature.home.PopularMoviesItemView
 import com.rodrigoloq.moviepedia.feature.home.viewmodel.HomeViewModel
-import com.rodrigoloq.moviepedia.retrofit.entities.Result
+import com.rodrigoloq.moviepedia.data.retrofit.entities.Result
 import com.rodrigoloq.moviepedia.feature.search.viewmodel.SearchUIState
 import com.rodrigoloq.moviepedia.feature.search.viewmodel.SearchViewModel
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme

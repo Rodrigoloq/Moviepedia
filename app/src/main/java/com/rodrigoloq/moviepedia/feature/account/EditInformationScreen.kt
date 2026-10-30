@@ -65,8 +65,7 @@ import coil3.request.crossfade
 import com.rodrigoloq.moviepedia.R
 import com.rodrigoloq.moviepedia.feature.account.viewmodel.AccountUIState
 import com.rodrigoloq.moviepedia.feature.account.viewmodel.EditInformationViewModel
-import com.rodrigoloq.moviepedia.room.MoviepediaApp
-import com.rodrigoloq.moviepedia.room.entities.User
+import com.rodrigoloq.moviepedia.data.room.entities.User
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
 import kotlin.text.trim
 

@@ -38,7 +38,7 @@ import androidx.navigation.compose.rememberNavController
 import com.rodrigoloq.moviepedia.R
 import com.rodrigoloq.moviepedia.feature.favorites.viewmodel.FavoritesUIState
 import com.rodrigoloq.moviepedia.feature.favorites.viewmodel.FavoritesViewModel
-import com.rodrigoloq.moviepedia.retrofit.entities.MovieDetailResponse
+import com.rodrigoloq.moviepedia.data.retrofit.entities.MovieDetailResponse
 import com.rodrigoloq.moviepedia.feature.reviews.reviewform.ReviewView
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
 import com.rodrigoloq.moviepedia.ui.theme.MoviepediaTheme
