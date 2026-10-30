@@ -7,10 +7,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.rodrigoloq.moviepedia.account.AccountView
-import com.rodrigoloq.moviepedia.favorites.FavoritesView
-import com.rodrigoloq.moviepedia.home.HomeView
-import com.rodrigoloq.moviepedia.search.SearchView
+import com.rodrigoloq.moviepedia.feature.account.AccountView
+import com.rodrigoloq.moviepedia.feature.favorites.FavoritesView
+import com.rodrigoloq.moviepedia.feature.home.HomeView
+import com.rodrigoloq.moviepedia.feature.search.SearchView
 
 @Composable
 fun AppNavHost(innerNavController: NavHostController,

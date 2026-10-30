@@ -11,13 +11,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.rodrigoloq.moviepedia.account.EditInformationView
-import com.rodrigoloq.moviepedia.login.LoginView
-import com.rodrigoloq.moviepedia.moviedetail.MovieDetailView
+import com.rodrigoloq.moviepedia.feature.account.EditInformationView
+import com.rodrigoloq.moviepedia.feature.login.LoginView
+import com.rodrigoloq.moviepedia.feature.moviedetail.MovieDetailView
 import com.rodrigoloq.moviepedia.navigation.viewmodel.AppNavigationViewModel
-import com.rodrigoloq.moviepedia.register.RegisterView
-import com.rodrigoloq.moviepedia.reviews.reviews.ReviewsView
-import com.rodrigoloq.moviepedia.reviews.userreviews.UserReviewsView
+import com.rodrigoloq.moviepedia.feature.register.RegisterView
+import com.rodrigoloq.moviepedia.feature.reviews.reviews.ReviewsView
+import com.rodrigoloq.moviepedia.feature.reviews.userreviews.UserReviewsView
 import com.rodrigoloq.moviepedia.room.MoviepediaApp
 import com.rodrigoloq.moviepedia.room.entities.UserAuth
 
